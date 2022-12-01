@@ -14,7 +14,7 @@ import { ReactComponent as Logo } from '../images/Login.svg';
 const theme = createTheme({
     palette: {
         background: {
-            default: "#5CC4FF"
+            // default: "#ADD8E6",
         },
         primary: {
             main: '#1056AF',
@@ -63,7 +63,6 @@ export default function LogIn() {
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
                         <TextField
                             margin="normal"
-                            required
                             fullWidth
                             id="user"
                             label="User Name"
@@ -74,7 +73,6 @@ export default function LogIn() {
                         />
                         <TextField
                             margin="normal"
-                            required
                             fullWidth
                             name="password"
                             label="Password"
