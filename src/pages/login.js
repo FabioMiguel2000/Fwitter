@@ -1,18 +1,29 @@
 import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom'
+import { ReactComponent as Logo } from '../images/Login.svg';
 
-const theme = createTheme();
+const theme = createTheme({
+    palette: {
+        background: {
+            default: "#5CC4FF"
+        },
+        primary: {
+            main: '#1056AF',
+        },
+        secondary: {
+            main: '#000000',
+        },
+    },
+});
 
 export default function LogIn() {
     const navigate = useNavigate();
@@ -46,9 +57,9 @@ export default function LogIn() {
                         alignItems: 'center',
                     }}
                 >
-                    <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                        <LockOutlinedIcon />
-                    </Avatar>
+                    <div>
+                        <Logo height="300px" width="300px" />
+                    </div>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
                         <TextField
                             margin="normal"
@@ -59,6 +70,7 @@ export default function LogIn() {
                             name="user"
                             autoComplete="user"
                             autoFocus
+                            sx={{ input: { color: 'primary.main' } }}
                         />
                         <TextField
                             margin="normal"
@@ -69,23 +81,24 @@ export default function LogIn() {
                             type="password"
                             id="password"
                             autoComplete="current-password"
+                            sx={{ input: { color: 'primary.main' } }}
                         />
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
+                            sx={{ mt: 3, mb: 2, borderRadius: 3, bgcolor: 'primary.main' }}
                         >
                             Log In
                         </Button>
-                        <Grid container>
+                        <Grid container spacing={0.5} justifyContent="center">
                             <Grid item>
-                                <Typography component="h1" variant="body2">
+                                <Typography component="h1" variant="body2" sx={{ mt: 0.4 }}>
                                     Don't have an account?
                                 </Typography>
                             </Grid>
                             <Grid item>
-                                <Link component="button" variant="body2" onClick={handleCreate}>
+                                <Link component="button" variant="body2" onClick={handleCreate} color='primary.main' underline="hover">
                                     {"Create Account"}
                                 </Link>
                             </Grid>
