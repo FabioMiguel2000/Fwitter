@@ -6,6 +6,9 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { ReactComponent as Logo } from '../images/Login.svg';
+import { user } from '../user'
+import { useNavigate } from 'react-router-dom';
+
 
 const theme = createTheme({
     palette: {
@@ -22,15 +25,30 @@ const theme = createTheme({
 });
 
 export default function CreateAccount() {
+    const navigate = useNavigate();
+
     const handleCreate = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
+        const user_ = data.get('user');
+        const pass_ = data.get('password');  
         console.log({
             user: data.get('user'),
             password: data.get('password'),
         });
 
         // completar aqui
+        /*user.create(user_, pass_, function(ack){
+            console.log("Created!", ack.pub);
+        })*/
+        user.create(user_, pass_, ({ err }) => {
+            if(err){
+                alert(err)
+            }
+            else{
+                navigate('/');
+            }
+        });
     };
 
     return (

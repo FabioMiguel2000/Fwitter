@@ -10,6 +10,7 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom'
 import { ReactComponent as Logo } from '../images/Login.svg';
+import { user } from '../user'
 
 const theme = createTheme({
     palette: {
@@ -35,8 +36,18 @@ export default function LogIn() {
             user: data.get('user'),
             password: data.get('password'),
         });
+        const user_ = data.get('user');
+        const pass_ = data.get('password');  
 
         // completar aqui
+        user.auth(user_, pass_, ({err})=> {
+            if(err){
+                alert(err)
+            }
+            else{
+                navigate('/homepage');
+            }
+        });
     };
 
     const handleCreate = (event) => {
