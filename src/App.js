@@ -1,6 +1,6 @@
 import CreateAccount from "./pages/createAccount";
 import LogIn from "./pages/login";
-import Home from "./pages/home";
+import Home from "./Pages/Home";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
@@ -12,6 +12,7 @@ function App() {
         <Route path="/homepage" element={<Home />} />
       </Routes>
     </Router>
+
   );
 }
 
