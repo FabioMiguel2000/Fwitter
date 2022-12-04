@@ -1,7 +1,7 @@
 import Gun from 'gun/gun';
 import 'gun/sea';
 import 'gun/axe';
-import { writable } from 'svelte/store'
+import { writable } from 'use-svelte-store';
 
 export const db = Gun();
 
