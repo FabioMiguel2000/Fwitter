@@ -6,10 +6,34 @@
 
     .left-side_bar{
         // background-color: red;
-        border-right: 1px solid grey;
         width: 20%;
         display: flex;
-        direction: column;
+        flex-direction: column;
+        margin: auto;
+        height: 100vh;
+        align-content: space-between;
+        justify-content: space-between;
+        .logo{
+            :first-child{
+                padding: 1.5em;
+                filter: grayscale(100%);
+                // transform: rotate(-90deg);
+            }
+        }
+        .logout-btn{
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2em;
+            width: 100%;
+            :first-child{
+                width: 60%;
+                text-transform: none;
+                border-radius: 20px;
+                :first-child{
+                    display: none;
+                }
+            }
+        }
     }
 
     .content-wrapper {
@@ -18,9 +42,7 @@
         padding: 0 2em;
         border-right: 1px grey solid;
         border-left: 1px grey solid;
-
-
-
+        
 
         .send_form-container{
             display: flex;
@@ -81,7 +103,49 @@
 
     .right-side_bar{
         // background-color: green;
-        border-left: 1px solid grey;
+        margin-top: 2em;
         width: 30%;
+        .follows_recomendations{
+            width: 80%;
+            margin: auto;
+            background-color: grey;
+            display: flex;
+            flex-direction: column;
+            padding: 1em;
+            border-radius: 14px;
+            .follows_recomendations-title{
+                font-weight: bolder;
+                margin-bottom: 1em;
+                color: white;
+
+            }
+            .follows-user_profile{
+                display: flex;
+                height: 80px;
+                align-items: center;
+                // background-color: white;
+                // border: 1px black solid;
+                .follows-user_profile_content{
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    width: 100%;
+                    padding: 1em;
+                    align-items: center;
+                    :first-child{
+                        color: white;
+                        font-weight: bold;
+                        font-size: small;
+                    }
+                    :nth-child(2){
+                        border-radius: 20px;
+                        text-transform: none;
+                        background-color: white;
+                        color: black;
+                        // border: black solid 1px;
+                    }
+                }
+            }
+        }
     }
 }

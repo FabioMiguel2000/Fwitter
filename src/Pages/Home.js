@@ -1,5 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
+import logo from "../img/Twitter-logo.png";
 
 import "./Home.scss";
 
@@ -145,11 +146,16 @@ const Home = () => {
 
   return (
     <Box className="homepage-container">
-      <Box className="left-side_bar"></Box>
+      <Box className="left-side_bar">
+        <Box className="logo">
+          <img src={logo} width={"40px"} height={"40px"}></img>
+        </Box>
+        <Box className="logout-btn">
+          <Button variant="contained">Logout</Button>
+        </Box>
+      </Box>
 
-      <Box
-        className="content-wrapper"
-      >
+      <Box className="content-wrapper">
         <Box className="send_form-container">
           <Typography variant="h5">Home</Typography>
           <Box className="send_form">
@@ -174,8 +180,13 @@ const Home = () => {
           <Box className="submit-btn_container">
             <Button
               variant="contained"
-              sx={{ borderRadius: "16px", textTransform: "none", backgroundColor: '#5CC4FF'}}
+              sx={{
+                borderRadius: "16px",
+                textTransform: "none",
+                backgroundColor: "#5CC4FF",
+              }}
               onClick={saveMessage}
+              disabled={postField.length === 0}
             >
               Tweet
             </Button>
@@ -199,9 +210,35 @@ const Home = () => {
           ))}
         </Box>
       </Box>
-      <Box
-        className="right-side_bar"
-      ></Box>
+      <Box className="right-side_bar">
+        <Box className="follows_recomendations">
+          <Typography className="follows_recomendations-title" variant="h6">
+            Who to follow
+          </Typography>
+          <Box className="follows-wrapper">
+            <Box className="follows-user_profile">
+              <InputAdornment>
+                <AccountCircle sx={{ height: "60px", width: "60px" }} />
+              </InputAdornment>
+              <Box className="follows-user_profile_content">
+                <Typography>Elon Musk</Typography>
+                <Button variant="contained">Follow</Button>
+              </Box>
+            </Box>
+          </Box>
+          <Box className="follows-wrapper">
+            <Box className="follows-user_profile">
+              <InputAdornment>
+                <AccountCircle sx={{ height: "60px", width: "60px" }} />
+              </InputAdornment>
+              <Box className="follows-user_profile_content">
+                <Typography>Donald Trump</Typography>
+                <Button variant="contained">Follow</Button>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
     </Box>
   );
 };
