@@ -1,0 +1,87 @@
+.homepage-container{
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    height: 100vh;
+
+    .left-side_bar{
+        // background-color: red;
+        border-right: 1px solid grey;
+        width: 20%;
+        display: flex;
+        direction: column;
+    }
+
+    .content-wrapper {
+        // background-color: blue;
+        width: 50%;
+        padding: 0 2em;
+        border-right: 1px grey solid;
+        border-left: 1px grey solid;
+
+
+
+
+        .send_form-container{
+            display: flex;
+            flex-direction: column;
+            padding: 1em 0;
+            // background-color: brown;
+            .send_form{
+                flex-grow: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                // background-color: aqua;
+
+                :first-child{   // Form Control
+                    height: 80px;
+                    // background-color: bisque;
+    
+                }
+            }
+            .submit-btn_container{
+                margin-right: 2em;
+                display: flex;
+                flex-direction: row;
+                justify-content: end;
+            }
+
+        }
+
+        .posts-wrapper{
+            // background-color: aquamarine;
+            max-height: 80%;
+            overflow-y: scroll;
+            .post_container{
+                border: 1px solid grey;
+                // background-color: chocolate;
+                height: 150px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                column-gap: 1em;
+                .post-content{
+                    .post-content-title{
+                        display: flex;
+                        flex-direction: row;
+                        column-gap: 1em ;
+
+                        :first-child {
+                            font-weight: bolder;
+                        }
+                        :nth-child(2){
+                            font-weight: lighter;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .right-side_bar{
+        // background-color: green;
+        border-left: 1px solid grey;
+        width: 30%;
+    }
+}
