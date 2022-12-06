@@ -12,8 +12,10 @@ import FormControl from "@mui/material/FormControl";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-import Gun from "gun"; // eslint-disable-line no-use-before-define
+import Gun from "gun";
 
 const gun = Gun();
 
@@ -35,6 +37,7 @@ const Home = () => {
     // console.log(user.get('follows'))
 
     console.log("init");
+    console.log(currUser);
 
     setPosts([]);
     setFollows([]);
@@ -44,14 +47,7 @@ const Home = () => {
       .get(currUser)
       .get("posts_timeline")
       .map()
-      .once((post) => {
-        // Initialize User Posts
-        // console.log(post.content)
-        setCurrUserPosts((currUserPosts) => [
-          ...currUserPosts,
-          { content: post.content, createdAt: post.createdAt, from: post.from },
-        ]);
-      });
+      .on(currUserPostsListener);
 
     // console.log(currUserPosts);
 
@@ -84,7 +80,26 @@ const Home = () => {
     // })
   }, []);
 
+  const currUserPostsListener = (value, key, _msg, _ev) => {
+    if (value === null) {
+      setCurrUserPosts((posts) => {
+        return posts.filter((post) => {
+          return !(post.from == key.split("_")[0] &&
+          String(post.createdAt) == key.split("_")[1]);
+        });
+      });
+      return;
+    }
+    const post = {
+      content: value.content,
+      createdAt: value.createdAt,
+      from: value.from,
+    };
+    setCurrUserPosts((currUserPosts) => [...currUserPosts, post]);
+  };
+
   function getAllPosts() {
+    console.log(currUserPosts);
     return currUserPosts.concat(posts).sort((b, a) => {
       return new Date(a.createdAt) - new Date(b.createdAt);
     });
@@ -144,6 +159,17 @@ const Home = () => {
     }`;
   }
 
+  function deletePost(createdAt) {
+    console.log("hello");
+    console.log(createdAt);
+    // gun
+    // .get("users")
+    // .get(currUser)
+    // .get("posts_timeline")
+    // .get(`${currUser}_${createdAt}`)
+    // .put(null);
+  }
+
   return (
     <Box className="homepage-container">
       <Box className="left-side_bar">
@@ -194,17 +220,44 @@ const Home = () => {
         </Box>
         <Box className="posts-wrapper">
           {getAllPosts().map((post) => (
-            <Box key={post.createdAt} className="post_container">
-              <InputAdornment>
-                <AccountCircle sx={{ height: "100px", width: "100px" }} />
-              </InputAdornment>
-              <Box className="post-content">
-                <Box className="post-content-title">
-                  <Typography>{post.from}</Typography>
-                  <Typography>{formatDate(post.createdAt)}</Typography>
-                </Box>
+            <Box key={post.createdAt} className="single_post-wrapper">
+              <Box className="post_container">
+                <InputAdornment>
+                  <AccountCircle sx={{ height: "100px", width: "100px" }} />
+                </InputAdornment>
+                <Box className="post-content">
+                  <Box className="post-content-title">
+                    <Typography>{post.from}</Typography>
+                    <Typography>{formatDate(post.createdAt)}</Typography>
+                  </Box>
 
-                <Typography>{post.content}</Typography>
+                  <Typography>{post.content}</Typography>
+                </Box>
+              </Box>
+
+              <Box className="post-action-btns-wrapper">
+                {post.from === currUser ? (
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => {
+                      gun
+                        .get("users")
+                        .get(currUser)
+                        .get("posts_timeline")
+                        .get(`${currUser}_${post.createdAt}`)
+                        .put(null);
+                    }}
+                  >
+                    <DeleteIcon />
+                    Delete
+                  </Button>
+                ) : (
+                  <Button variant="contained">
+                    <PersonRemoveIcon />
+                    Unfollow
+                  </Button>
+                )}
               </Box>
             </Box>
           ))}

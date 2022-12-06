@@ -72,30 +72,54 @@
         }
 
         .posts-wrapper{
+            
             // background-color: aquamarine;
             max-height: 80%;
-            overflow-y: scroll;
-            .post_container{
+            overflow-y: auto;
+            .single_post-wrapper{
                 border: 1px solid grey;
-                // background-color: chocolate;
-                height: 150px;
                 display: flex;
-                flex-direction: row;
+                justify-content: space-between;
                 align-items: center;
-                column-gap: 1em;
-                .post-content{
-                    .post-content-title{
-                        display: flex;
-                        flex-direction: row;
-                        column-gap: 1em ;
-
-                        :first-child {
-                            font-weight: bolder;
-                        }
-                        :nth-child(2){
-                            font-weight: lighter;
+                .post_container{
+                    
+                    // background-color: chocolate;
+                    height: 150px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    // justify-content: space-between;
+    
+                    column-gap: 1em;
+                    .post-content{
+                        .post-content-title{
+                            display: flex;
+                            flex-direction: row;
+                            column-gap: 1em ;
+    
+                            :first-child {
+                                font-weight: bolder;
+                            }
+                            :nth-child(2){
+                                font-weight: lighter;
+                            }
                         }
                     }
+                }
+                .post-action-btns-wrapper{
+                    display: flex;
+                    flex-direction: column;
+                    row-gap: 1em;
+                    align-content: space-between;
+                    padding: 1em;
+                    button{
+                        text-transform: none;
+                        gap: 1em;
+                        justify-content: left;
+                        text-align: left;
+                        border-radius: 16px;
+                    }
+                    
                 }
             }
         }
