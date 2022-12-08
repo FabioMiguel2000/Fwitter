@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import logo from "../../images/Twitter-logo.png";
-import { useNavigate, redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import "./Home.scss";
 
@@ -13,7 +13,6 @@ import FormControl from "@mui/material/FormControl";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
@@ -24,11 +23,8 @@ const Home = ({ gun, user }) => {
   const [follows, setFollows] = useState([]);
   const [posts, setPosts] = useState([]);
   const [currUserPosts, setCurrUserPosts] = useState([]);
-  // const [formState, setFormState] = useState({ name: "", message: "" });
-  // const [state, dispatch] = useReducer(reducer, initialState)
   const [postField, setPostField] = useState("");
 
-  // How do we know which informations a peer is storing????
   useEffect(() => {
     gun.user().once((data) => {
       setCurrUser(data.alias);
@@ -47,15 +43,8 @@ const Home = ({ gun, user }) => {
       .get(currUser)
       .get("posts_timeline")
       .on((data) => {
-        // console.log(data)
         setCurrUserPosts([]);
         for (let key in data) {
-          // if (key !== "_" && data[key] !== null) {
-          //   setCurrUserPosts((prev) => [
-          //     ...prev,
-          //     { content: data[key].content, from: currUser, createdAt: data[key].createdAt },
-          //   ]);
-          // }
           gun
             .get("users")
             .get(currUser)
@@ -64,12 +53,6 @@ const Home = ({ gun, user }) => {
             .on(currUserPostsListener);
         }
       });
-
-    // gun
-    //   .get("users")
-    //   .get(currUser)
-    //   .get("posts_timeline")
-    //   .on(currUserPostsListener);
   }, [currUser]);
 
   const deduplicate = (posts) => {
@@ -80,8 +63,8 @@ const Home = ({ gun, user }) => {
       exist = false;
       for (let de_post in deduplicated) {
         if (
-          deduplicated[de_post].createdAt == posts[post].createdAt &&
-          deduplicated[de_post].from == posts[post].from
+          deduplicated[de_post].createdAt === posts[post].createdAt &&
+          deduplicated[de_post].from === posts[post].from
         ) {
           exist = true;
           break;
@@ -110,20 +93,11 @@ const Home = ({ gun, user }) => {
       return;
     }
 
-    // for(let post in currUserPosts){
-    //   console.log(post.createdAt)
-    //   if(post.createdAt === value.createdAt){
-    //     return
-    //   }
-    // }
-
     const post = {
       content: value.content,
       createdAt: value.createdAt,
       from: value.from,
     };
-
-    // console.log(post)
     setCurrUserPosts((currUserPosts) => [...currUserPosts, post]);
   };
 
@@ -202,7 +176,6 @@ const Home = ({ gun, user }) => {
         follArr.push(key);
       }
     }
-    // // Bug aqui quando refresh e apagar rever !!!!
     follArr.forEach((foll) => {
       gun
         .get("users")
@@ -219,12 +192,8 @@ const Home = ({ gun, user }) => {
     });
   }
 
-  // function getPostsFromUser(userAlias) {
-  //   const postsTimeline = gun.get(userAlias).get('posts_timeline')
-  //   setPosts(posts => [...posts, postsTimeline])
-  // }
 
-  function saveMessage(e) {
+  function handleSendPost(e) {
     e.preventDefault();
 
     const newPost = {
@@ -265,7 +234,7 @@ const Home = ({ gun, user }) => {
     <Box className="homepage-container">
       <Box className="left-side_bar">
         <Box className="logo">
-          <img src={logo} width={"40px"} height={"40px"}></img>
+          <img src={logo} alt="logo" width={"40px"} height={"40px"}></img>
         </Box>
 
         <Box className="logout-btn">
@@ -286,9 +255,6 @@ const Home = ({ gun, user }) => {
           <Typography variant="h5">Home</Typography>
           <Box className="send_form">
             <FormControl variant="standard" fullWidth>
-              {/* <InputLabel htmlFor="input-with-icon-adornment">
-              With a start adornment
-            </InputLabel> */}
               <Input
                 placeholder="What's happening?"
                 disableUnderline={true}
@@ -311,16 +277,13 @@ const Home = ({ gun, user }) => {
                 textTransform: "none",
                 backgroundColor: "#5CC4FF",
               }}
-              onClick={saveMessage}
+              onClick={handleSendPost}
               disabled={postField.length === 0}
             >
               Tweet
             </Button>
           </Box>
         </Box>
-        {/* {follows.map((follow) => (
-          <p>{follow}</p>
-        ))} */}
         <Box className="posts-wrapper">
           {getAllPosts().map((post) => (
             <Box key={post.createdAt} className="single_post-wrapper">

@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-import { ReactComponent as Logo } from "../images/Login.svg";
+import { ReactComponent as Logo } from "../../images/Login.svg";
 
 const theme = createTheme({
   palette: {

@@ -1,5 +1,5 @@
-import CreateAccount from "./Pages/createAccount";
-import LogIn from "./Pages/login";
+import CreateAccount from "./Pages/Auth/createAccount";
+import LogIn from "./Pages/Auth/login";
 import Home from "./Pages/Home/Home";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Gun from "gun/gun";
