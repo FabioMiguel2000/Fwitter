@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import logo from "../images/Twitter-logo.png";
+import logo from "../../images/Twitter-logo.png";
 
 import "./Home.scss";
 
