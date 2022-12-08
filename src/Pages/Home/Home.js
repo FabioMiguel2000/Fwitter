@@ -1,8 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import logo from "../../images/Twitter-logo.png";
-import { Navigate } from 'react-router-dom';
-
+import { useNavigate, redirect } from "react-router-dom";
 
 import "./Home.scss";
 
@@ -16,11 +15,10 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
-import { keyboardImplementationWrapper } from "@testing-library/user-event/dist/keyboard";
-
-const Home = ({ gun }) => {
-
+const Home = ({ gun, user }) => {
+  const navigate = useNavigate();
   const [currUser, setCurrUser] = useState("");
   const [allUsers, setAllUsers] = useState([]);
   const [follows, setFollows] = useState([]);
@@ -38,6 +36,9 @@ const Home = ({ gun }) => {
   }, []);
 
   useEffect(() => {
+    if (!user.is) {
+      navigate("/login");
+    }
     gun.get("users").on(handleAllUsers);
     gun.get("users").get(currUser).get("follows").on(handleAllFollows);
     gun.get("users").get(currUser).get("follows").on(handleFollowPosts);
@@ -56,14 +57,14 @@ const Home = ({ gun }) => {
           //   ]);
           // }
           gun
-          .get("users")
-          .get(currUser)
-          .get("posts_timeline")
-          .get(key)
-          .on(currUserPostsListener)
+            .get("users")
+            .get(currUser)
+            .get("posts_timeline")
+            .get(key)
+            .on(currUserPostsListener);
         }
       });
-  
+
     // gun
     //   .get("users")
     //   .get(currUser)
@@ -71,28 +72,31 @@ const Home = ({ gun }) => {
     //   .on(currUserPostsListener);
   }, [currUser]);
 
-  const deduplicate = (posts) =>{
-    let deduplicated = []
+  const deduplicate = (posts) => {
+    let deduplicated = [];
     let exist = false;
 
-    for (let post in posts){
+    for (let post in posts) {
       exist = false;
-      for(let de_post in deduplicated){
-        if(deduplicated[de_post].createdAt == posts[post].createdAt && deduplicated[de_post].from == posts[post].from){
+      for (let de_post in deduplicated) {
+        if (
+          deduplicated[de_post].createdAt == posts[post].createdAt &&
+          deduplicated[de_post].from == posts[post].from
+        ) {
           exist = true;
           break;
         }
       }
-      if(!exist){
-        deduplicated.push(posts[post])
+      if (!exist) {
+        deduplicated.push(posts[post]);
       }
     }
     return deduplicated;
-  }
+  };
 
   const currUserPostsListener = (value, key, _msg, _ev) => {
-    if(key === '_'){
-      return
+    if (key === "_") {
+      return;
     }
     if (value === null) {
       setCurrUserPosts((posts) => {
@@ -112,7 +116,7 @@ const Home = ({ gun }) => {
     //     return
     //   }
     // }
-    
+
     const post = {
       content: value.content,
       createdAt: value.createdAt,
@@ -142,7 +146,6 @@ const Home = ({ gun }) => {
     };
     setPosts((posts) => [...posts, post]);
   };
-
 
   const handleAllUsers = (data) => {
     setAllUsers([]);
@@ -189,7 +192,7 @@ const Home = ({ gun }) => {
   };
 
   const handleFollowPosts = (data) => {
-    console.log(data)
+    console.log(data);
 
     let follArr = [];
     setPosts([]);
@@ -211,7 +214,6 @@ const Home = ({ gun }) => {
   };
 
   function getAllPosts() {
-
     return deduplicate(currUserPosts.concat(posts)).sort((b, a) => {
       return new Date(parseInt(a.createdAt)) - new Date(parseInt(b.createdAt));
     });
@@ -240,6 +242,10 @@ const Home = ({ gun }) => {
 
     setPostField("");
   }
+  function logOut() {
+    user.leave();
+    navigate("/login");
+  }
 
   function onChange(e) {
     setPostField(e.target.value);
@@ -254,16 +260,24 @@ const Home = ({ gun }) => {
         .split(".")[0]
     }`;
   }
-  
+
   return (
     <Box className="homepage-container">
       <Box className="left-side_bar">
         <Box className="logo">
           <img src={logo} width={"40px"} height={"40px"}></img>
         </Box>
-        <Typography variant="h5">{currUser}</Typography>
+
         <Box className="logout-btn">
-          <Button variant="contained">Logout</Button>
+          <Box>
+            <InputAdornment>
+              <AccountCircle sx={{ height: "50px", width: "50px" }} />
+            </InputAdornment>
+          </Box>
+          <Typography variant="h5">{currUser}</Typography>
+          <Button variant="text" onClick={logOut}>
+            <ExitToAppIcon/>
+          </Button>
         </Box>
       </Box>
 
@@ -335,10 +349,7 @@ const Home = ({ gun }) => {
                     Delete
                   </Button>
                 ) : (
-                  <Button variant="contained">
-                    <PersonRemoveIcon />
-                    Unfollow
-                  </Button>
+                  <></>
                 )}
               </Box>
             </Box>

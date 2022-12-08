@@ -22,17 +22,19 @@
       }
       .logout-btn{
           display: flex;
-          justify-content: center;
-          margin-bottom: 2em;
+          flex-direction: row;
+          justify-content: space-evenly;
+          align-items: center;
+          margin-bottom: 3em;
           width: 100%;
-          :first-child{
-              width: 60%;
-              text-transform: none;
-              border-radius: 20px;
-              :first-child{
-                  display: none;
-              }
-          }
+          // button{
+          //     width: 60%;
+          //     text-transform: none;
+          //     border-radius: 20px;
+          //     :first-child{
+          //         display: none;
+          //     }
+          // }
       }
   }
 

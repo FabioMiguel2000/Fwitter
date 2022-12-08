@@ -43,7 +43,7 @@ export default function LogIn({ gun, user }) {
       if (err) {
         alert(err);
       } else {
-        navigate("/homepage");
+        navigate("/");
       }
     });
   };

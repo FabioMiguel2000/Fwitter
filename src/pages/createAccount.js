@@ -40,7 +40,7 @@ export default function CreateAccount({ gun, user }) {
             alert(err);
           } else {
             gun.get("users").get(user_).put(ack.pub);
-            navigate("/homepage");
+            navigate("/");
           }
         });
       }

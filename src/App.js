@@ -17,12 +17,13 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route index element={<LogIn gun={gun} user={user} />} />
+        <Route index element={<Home gun={gun} user={user}/>} />
+        <Route path="/login" element={<LogIn gun={gun} user={user} />} />
         <Route
           path="/create_account"
           element={<CreateAccount gun={gun} user={user} />}
         />
-        {user ? <Route path="/homepage" element={<Home gun={gun} />} /> : <Route index element={<LogIn gun={gun} user={user} />} />}
+         {/* <Route path="/homepage" element={<Home gun={gun} user={user}/>} /> : <Route index element={<LogIn gun={gun} user={user} />} />} */}
       </Routes>
     </Router>
   );
