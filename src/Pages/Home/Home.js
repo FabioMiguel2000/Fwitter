@@ -1,6 +1,8 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import logo from "../../images/Twitter-logo.png";
+import { Navigate } from 'react-router-dom';
+
 
 import "./Home.scss";
 
@@ -18,6 +20,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { keyboardImplementationWrapper } from "@testing-library/user-event/dist/keyboard";
 
 const Home = ({ gun }) => {
+
   const [currUser, setCurrUser] = useState("");
   const [allUsers, setAllUsers] = useState([]);
   const [follows, setFollows] = useState([]);
@@ -38,30 +41,59 @@ const Home = ({ gun }) => {
     gun.get("users").on(handleAllUsers);
     gun.get("users").get(currUser).get("follows").on(handleAllFollows);
     gun.get("users").get(currUser).get("follows").on(handleFollowPosts);
-    // gun
-    //   .get("users")
-    //   .get(currUser)
-    //   .get("posts_timeline")
-    //   .on((data) => {
-    //     setCurrUserPosts([]);
-    //     for (let key in data) {
-    //       if (key !== "_" && data[key] !== null) {
-    //         setCurrUserPosts((prev) => [
-    //           ...prev,
-    //           { content: data[key], from: currUser, createdAt: key },
-    //         ]);
-    //       }
-    //     }
-    //   });
     gun
       .get("users")
       .get(currUser)
       .get("posts_timeline")
-      .map()
-      .on(currUserPostsListener);
+      .on((data) => {
+        // console.log(data)
+        setCurrUserPosts([]);
+        for (let key in data) {
+          // if (key !== "_" && data[key] !== null) {
+          //   setCurrUserPosts((prev) => [
+          //     ...prev,
+          //     { content: data[key].content, from: currUser, createdAt: data[key].createdAt },
+          //   ]);
+          // }
+          gun
+          .get("users")
+          .get(currUser)
+          .get("posts_timeline")
+          .get(key)
+          .on(currUserPostsListener)
+        }
+      });
+  
+    // gun
+    //   .get("users")
+    //   .get(currUser)
+    //   .get("posts_timeline")
+    //   .on(currUserPostsListener);
   }, [currUser]);
 
+  const deduplicate = (posts) =>{
+    let deduplicated = []
+    let exist = false;
+
+    for (let post in posts){
+      exist = false;
+      for(let de_post in deduplicated){
+        if(deduplicated[de_post].createdAt == posts[post].createdAt && deduplicated[de_post].from == posts[post].from){
+          exist = true;
+          break;
+        }
+      }
+      if(!exist){
+        deduplicated.push(posts[post])
+      }
+    }
+    return deduplicated;
+  }
+
   const currUserPostsListener = (value, key, _msg, _ev) => {
+    if(key === '_'){
+      return
+    }
     if (value === null) {
       setCurrUserPosts((posts) => {
         return posts.filter((post) => {
@@ -73,11 +105,21 @@ const Home = ({ gun }) => {
       });
       return;
     }
+
+    // for(let post in currUserPosts){
+    //   console.log(post.createdAt)
+    //   if(post.createdAt === value.createdAt){
+    //     return
+    //   }
+    // }
+    
     const post = {
       content: value.content,
       createdAt: value.createdAt,
       from: value.from,
     };
+
+    // console.log(post)
     setCurrUserPosts((currUserPosts) => [...currUserPosts, post]);
   };
 
@@ -157,12 +199,6 @@ const Home = ({ gun }) => {
         follArr.push(key);
       }
     }
-
-    
-
-    // console.log("follArr", follArr);
-    // let auxPosts = [];
-
     // // Bug aqui quando refresh e apagar rever !!!!
     follArr.forEach((foll) => {
       gun
@@ -175,8 +211,8 @@ const Home = ({ gun }) => {
   };
 
   function getAllPosts() {
-    // console.log(posts)
-    return currUserPosts.concat(posts).sort((b, a) => {
+
+    return deduplicate(currUserPosts.concat(posts)).sort((b, a) => {
       return new Date(parseInt(a.createdAt)) - new Date(parseInt(b.createdAt));
     });
   }
@@ -206,13 +242,8 @@ const Home = ({ gun }) => {
   }
 
   function onChange(e) {
-    // setFormState({...formState, [e.target.name]: e.target.value })
     setPostField(e.target.value);
   }
-
-  // function onChangeUser(e) {
-  //   setCurrUser(e.target.value)
-  // }
 
   function formatDate(miliseconds) {
     return `${new Date(parseInt(miliseconds)).toISOString().split("T")[0]} - ${
@@ -223,7 +254,7 @@ const Home = ({ gun }) => {
         .split(".")[0]
     }`;
   }
-
+  
   return (
     <Box className="homepage-container">
       <Box className="left-side_bar">
