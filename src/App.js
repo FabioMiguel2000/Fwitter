@@ -6,10 +6,11 @@ import Gun from "gun/gun";
 import "gun/sea";
 
 function App() {
-  const gun = Gun({
-    file: "db/data.json",
-    peers: [`http://localhost:8765/gun`],
-  });
+  // const gun = Gun({
+  //   file: "db/data.json",
+  //   peers: [`http://localhost:8765/gun`],
+  // });
+  const gun = Gun();
   const user = gun.user().recall({ sessionStorage: true });
 
   return (
@@ -20,7 +21,7 @@ function App() {
           path="/create_account"
           element={<CreateAccount gun={gun} user={user} />}
         />
-        <Route path="/homepage" element={<Home gun={gun} user={user} />} />
+        <Route path="/homepage" element={<Home gun={gun} />} />
       </Routes>
     </Router>
   );

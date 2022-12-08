@@ -12,10 +12,13 @@ import FormControl from "@mui/material/FormControl";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 import { keyboardImplementationWrapper } from "@testing-library/user-event/dist/keyboard";
 
-const Home = ({ gun, user }) => {
-  const [currUser, setCurrUser] = useState("Fab");
+const Home = ({ gun }) => {
+  const [currUser, setCurrUser] = useState("");
   const [allUsers, setAllUsers] = useState([]);
   const [follows, setFollows] = useState([]);
   const [posts, setPosts] = useState([]);
@@ -25,6 +28,79 @@ const Home = ({ gun, user }) => {
   const [postField, setPostField] = useState("");
 
   // How do we know which informations a peer is storing????
+  useEffect(() => {
+    gun.user().once((data) => {
+      setCurrUser(data.alias);
+    });
+  }, []);
+
+  useEffect(() => {
+    gun.get("users").on(handleAllUsers);
+    gun.get("users").get(currUser).get("follows").on(handleAllFollows);
+    gun.get("users").get(currUser).get("follows").on(handleFollowPosts);
+    // gun
+    //   .get("users")
+    //   .get(currUser)
+    //   .get("posts_timeline")
+    //   .on((data) => {
+    //     setCurrUserPosts([]);
+    //     for (let key in data) {
+    //       if (key !== "_" && data[key] !== null) {
+    //         setCurrUserPosts((prev) => [
+    //           ...prev,
+    //           { content: data[key], from: currUser, createdAt: key },
+    //         ]);
+    //       }
+    //     }
+    //   });
+    gun
+      .get("users")
+      .get(currUser)
+      .get("posts_timeline")
+      .map()
+      .on(currUserPostsListener);
+  }, [currUser]);
+
+  const currUserPostsListener = (value, key, _msg, _ev) => {
+    if (value === null) {
+      setCurrUserPosts((posts) => {
+        return posts.filter((post) => {
+          return !(
+            post.from === key.split("_")[0] &&
+            String(post.createdAt) === key.split("_")[1]
+          );
+        });
+      });
+      return;
+    }
+    const post = {
+      content: value.content,
+      createdAt: value.createdAt,
+      from: value.from,
+    };
+    setCurrUserPosts((currUserPosts) => [...currUserPosts, post]);
+  };
+
+  const followsPostsListener = (value, key, _msg, _ev) => {
+    if (value === null) {
+      setPosts((posts) => {
+        return posts.filter((post) => {
+          return !(
+            post.from === key.split("_")[0] &&
+            String(post.createdAt) === key.split("_")[1]
+          );
+        });
+      });
+      return;
+    }
+    const post = {
+      content: value.content,
+      createdAt: value.createdAt,
+      from: value.from,
+    };
+    setPosts((posts) => [...posts, post]);
+  };
+
 
   const handleAllUsers = (data) => {
     setAllUsers([]);
@@ -38,9 +114,9 @@ const Home = ({ gun, user }) => {
   const handleDeletePost = (post) => {
     gun
       .get("users")
-      .get(currUser)
+      .get(post.from)
       .get("posts_timeline")
-      .get(post.createdAt)
+      .get(`${post.from}_${post.createdAt}`)
       .put(null);
   };
 
@@ -71,6 +147,8 @@ const Home = ({ gun, user }) => {
   };
 
   const handleFollowPosts = (data) => {
+    console.log(data)
+
     let follArr = [];
     setPosts([]);
 
@@ -80,96 +158,24 @@ const Home = ({ gun, user }) => {
       }
     }
 
-    console.log("follArr", follArr);
-    let auxPosts = [];
+    
 
-    // Bug aqui quando refresh e apagar rever !!!!
+    // console.log("follArr", follArr);
+    // let auxPosts = [];
+
+    // // Bug aqui quando refresh e apagar rever !!!!
     follArr.forEach((foll) => {
       gun
         .get("users")
         .get(foll)
         .get("posts_timeline")
-        .on((data) => {
-          for (let key in data) {
-            if (key !== "_" && data[key] !== null) {
-              console.log("key data", key, data[key]);
-
-              auxPosts.push({
-                content: data[key],
-                from: foll,
-                createdAt: key,
-              });
-            }
-          }
-
-          // Talvez _??? Mudar estutura para  {
-          //
-          //   [alias]: { ev: _ev, items: new_items },
-          // };
-
-          setPosts((prev) => [...prev, ...auxPosts]);
-        });
+        .map()
+        .on(followsPostsListener);
     });
   };
 
-  useEffect(() => {
-    gun.get("users").on(handleAllUsers);
-    gun.get("users").get(currUser).get("follows").on(handleAllFollows);
-    gun.get("users").get(currUser).get("follows").on(handleFollowPosts);
-    gun
-      .get("users")
-      .get(currUser)
-      .get("posts_timeline")
-      .on((data) => {
-        setCurrUserPosts([]);
-        for (let key in data) {
-          if (key !== "_" && data[key] !== null) {
-            setCurrUserPosts((prev) => [
-              ...prev,
-              { content: data[key], from: currUser, createdAt: key },
-            ]);
-          }
-        }
-      });
-  }, [currUser]);
-
-  useEffect(() => {
-    gun.user().once((data) => {
-      setCurrUser(data.alias);
-    });
-
-    // console.log(currUserPosts);
-
-    // user
-    //   .get("follows")
-    //   .map()
-    //   .once((followsUser) => {
-    //     console.log(followsUser.follows);
-    //     setFollows((follows) => [...follows, followsUser.follows]);
-
-    //     console.log(follows)
-    //     // followsUser
-    //     //   .get("posts_timeline")
-    //     //   .map()
-    //     //   .once((post) => {
-    //     //     console.log(`${followsUser} has post content = ${post.content}`);
-    //     //     setPosts((posts) => [...posts, post]);
-    //     //   });
-    //   }); // Initialize User follows and Posts
-
-    // console.log(user);
-
-    // messages.map().once(message=>{    // Syncs the local state with the states from the peers
-    //     console.log(message.message)
-    //     dispatch({
-    //         name: message.name,
-    //         message: message.message,
-    //         createdAt: message.createdAt
-    //     })
-    // })
-  }, []);
-
   function getAllPosts() {
+    // console.log(posts)
     return currUserPosts.concat(posts).sort((b, a) => {
       return new Date(parseInt(a.createdAt)) - new Date(parseInt(b.createdAt));
     });
@@ -182,24 +188,19 @@ const Home = ({ gun, user }) => {
 
   function saveMessage(e) {
     e.preventDefault();
-    // const messages = gun.get('messages')
-    // console.log(messages)
-    // messages.set({
-    //     name: formState.name,
-    //     message: formState.message,
-    //     createdAt: Date.now()
-    // })
-    // setFormState({
-    //     name: '',
-    //     message: '',
-    // })
+
+    const newPost = {
+      from: currUser,
+      content: postField,
+      createdAt: Date.now(),
+    };
 
     gun
       .get("users")
       .get(currUser)
       .get("posts_timeline")
-      .get(Date.now())
-      .put(postField);
+      .get(`${currUser}_${newPost.createdAt}`)
+      .put(newPost);
 
     setPostField("");
   }
@@ -214,7 +215,6 @@ const Home = ({ gun, user }) => {
   // }
 
   function formatDate(miliseconds) {
-    console.log(miliseconds);
     return `${new Date(parseInt(miliseconds)).toISOString().split("T")[0]} - ${
       new Date(parseInt(miliseconds))
         .toISOString()
@@ -273,30 +273,42 @@ const Home = ({ gun, user }) => {
             </Button>
           </Box>
         </Box>
-        {follows.map((follow) => (
+        {/* {follows.map((follow) => (
           <p>{follow}</p>
-        ))}
+        ))} */}
         <Box className="posts-wrapper">
-          {getAllPosts().map((post, idx) => (
-            <Box key={idx} className="post_container">
-              <InputAdornment>
-                <AccountCircle sx={{ height: "100px", width: "100px" }} />
-              </InputAdornment>
-              <Box className="post-content">
-                <Box className="post-content-title">
-                  <Typography>{post.from}</Typography>
-                  <Typography>{formatDate(post.createdAt)}</Typography>
-                  {post.from === currUser && (
-                    <Button
-                      onClick={() => handleDeletePost(post)}
-                      variant="contained"
-                    >
-                      Delete
-                    </Button>
-                  )}
-                </Box>
+          {getAllPosts().map((post) => (
+            <Box key={post.createdAt} className="single_post-wrapper">
+              <Box className="post_container">
+                <InputAdornment>
+                  <AccountCircle sx={{ height: "100px", width: "100px" }} />
+                </InputAdornment>
+                <Box className="post-content">
+                  <Box className="post-content-title">
+                    <Typography>{post.from}</Typography>
+                    <Typography>{formatDate(post.createdAt)}</Typography>
+                  </Box>
 
-                <Typography>{post.content}</Typography>
+                  <Typography>{post.content}</Typography>
+                </Box>
+              </Box>
+
+              <Box className="post-action-btns-wrapper">
+                {post.from === currUser ? (
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => handleDeletePost(post)}
+                  >
+                    <DeleteIcon />
+                    Delete
+                  </Button>
+                ) : (
+                  <Button variant="contained">
+                    <PersonRemoveIcon />
+                    Unfollow
+                  </Button>
+                )}
               </Box>
             </Box>
           ))}
@@ -307,19 +319,8 @@ const Home = ({ gun, user }) => {
           <Typography className="follows_recomendations-title" variant="h6">
             Who to follow
           </Typography>
-          <Box className="follows-wrapper">
-            <Box className="follows-user_profile">
-              <InputAdornment>
-                <AccountCircle sx={{ height: "60px", width: "60px" }} />
-              </InputAdornment>
-              <Box className="follows-user_profile_content">
-                <Typography>Elon Musk</Typography>
-                <Button variant="contained">Follow</Button>
-              </Box>
-            </Box>
-          </Box>
           {allUsers.map((user, idx) => (
-            <Box className="follows-wrapper">
+            <Box className="follows-wrapper" key={`follow_profile_${user}`}>
               <Box className="follows-user_profile">
                 <InputAdornment>
                   <AccountCircle sx={{ height: "60px", width: "60px" }} />
