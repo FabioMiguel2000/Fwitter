@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import logo from "../../images/Twitter-logo.png";
+import logo from "../images/Twitter-logo.png";
 
 import "./Home.scss";
 
@@ -12,15 +12,11 @@ import FormControl from "@mui/material/FormControl";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { keyboardImplementationWrapper } from "@testing-library/user-event/dist/keyboard";
 
-import Gun from "gun";
-
-const gun = Gun();
-
-const Home = () => {
+const Home = ({ gun, user }) => {
   const [currUser, setCurrUser] = useState("Fab");
+  const [allUsers, setAllUsers] = useState([]);
   const [follows, setFollows] = useState([]);
   const [posts, setPosts] = useState([]);
   const [currUserPosts, setCurrUserPosts] = useState([]);
@@ -29,25 +25,118 @@ const Home = () => {
   const [postField, setPostField] = useState("");
 
   // How do we know which informations a peer is storing????
-  useEffect(() => {
-    // users.set(user);
 
-    // user.get('follows').set(user)
+  const handleAllUsers = (data) => {
+    setAllUsers([]);
+    for (let key in data) {
+      if (key !== "_" && key !== currUser) {
+        setAllUsers((prev) => [...prev, key]);
+      }
+    }
+  };
 
-    // console.log(user.get('follows'))
-
-    console.log("init");
-    console.log(currUser);
-
-    setPosts([]);
-    setFollows([]);
-
+  const handleDeletePost = (post) => {
     gun
       .get("users")
       .get(currUser)
       .get("posts_timeline")
-      .map()
-      .on(currUserPostsListener);
+      .get(post.createdAt)
+      .put(null);
+  };
+
+  const handleAddFollow = (username) => {
+    console.log("username", username);
+    gun
+      .get("users")
+      .get(currUser)
+      .get("follows")
+      .put({ [username]: username });
+
+    setFollows((prev) => [...prev, username]);
+  };
+
+  const handleRemoveFollow = (username) => {
+    console.log("username", username);
+    gun.get("users").get(currUser).get("follows").get(username).put(null);
+  };
+
+  const handleAllFollows = (data) => {
+    console.log("data follows", data);
+    setFollows([]);
+    for (let key in data) {
+      if (key !== "_" && data[key] !== null) {
+        setFollows((prev) => [...prev, key]);
+      }
+    }
+  };
+
+  const handleFollowPosts = (data) => {
+    let follArr = [];
+    setPosts([]);
+
+    for (let key in data) {
+      if (key !== "_" && data[key] !== null) {
+        follArr.push(key);
+      }
+    }
+
+    console.log("follArr", follArr);
+    let auxPosts = [];
+
+    // Bug aqui quando refresh e apagar rever !!!!
+    follArr.forEach((foll) => {
+      gun
+        .get("users")
+        .get(foll)
+        .get("posts_timeline")
+        .on((data) => {
+          for (let key in data) {
+            if (key !== "_" && data[key] !== null) {
+              console.log("key data", key, data[key]);
+
+              auxPosts.push({
+                content: data[key],
+                from: foll,
+                createdAt: key,
+              });
+            }
+          }
+
+          // Talvez _??? Mudar estutura para  {
+          //
+          //   [alias]: { ev: _ev, items: new_items },
+          // };
+
+          setPosts((prev) => [...prev, ...auxPosts]);
+        });
+    });
+  };
+
+  useEffect(() => {
+    gun.get("users").on(handleAllUsers);
+    gun.get("users").get(currUser).get("follows").on(handleAllFollows);
+    gun.get("users").get(currUser).get("follows").on(handleFollowPosts);
+    gun
+      .get("users")
+      .get(currUser)
+      .get("posts_timeline")
+      .on((data) => {
+        setCurrUserPosts([]);
+        for (let key in data) {
+          if (key !== "_" && data[key] !== null) {
+            setCurrUserPosts((prev) => [
+              ...prev,
+              { content: data[key], from: currUser, createdAt: key },
+            ]);
+          }
+        }
+      });
+  }, [currUser]);
+
+  useEffect(() => {
+    gun.user().once((data) => {
+      setCurrUser(data.alias);
+    });
 
     // console.log(currUserPosts);
 
@@ -80,28 +169,9 @@ const Home = () => {
     // })
   }, []);
 
-  const currUserPostsListener = (value, key, _msg, _ev) => {
-    if (value === null) {
-      setCurrUserPosts((posts) => {
-        return posts.filter((post) => {
-          return !(post.from === key.split("_")[0] &&
-          String(post.createdAt) === key.split("_")[1]);
-        });
-      });
-      return;
-    }
-    const post = {
-      content: value.content,
-      createdAt: value.createdAt,
-      from: value.from,
-    };
-    setCurrUserPosts((currUserPosts) => [...currUserPosts, post]);
-  };
-
   function getAllPosts() {
-    console.log(currUserPosts);
     return currUserPosts.concat(posts).sort((b, a) => {
-      return new Date(a.createdAt) - new Date(b.createdAt);
+      return new Date(parseInt(a.createdAt)) - new Date(parseInt(b.createdAt));
     });
   }
 
@@ -124,18 +194,12 @@ const Home = () => {
     //     message: '',
     // })
 
-    const newPost = {
-      from: currUser,
-      content: postField,
-      createdAt: Date.now(),
-    };
-
     gun
       .get("users")
       .get(currUser)
       .get("posts_timeline")
-      .get(`${currUser}_${newPost.createdAt}`)
-      .put(newPost);
+      .get(Date.now())
+      .put(postField);
 
     setPostField("");
   }
@@ -150,24 +214,14 @@ const Home = () => {
   // }
 
   function formatDate(miliseconds) {
-    return `${new Date(miliseconds).toISOString().split("T")[0]} - ${
-      new Date(miliseconds)
+    console.log(miliseconds);
+    return `${new Date(parseInt(miliseconds)).toISOString().split("T")[0]} - ${
+      new Date(parseInt(miliseconds))
         .toISOString()
         .split("T")[1]
         .split("Z")[0]
         .split(".")[0]
     }`;
-  }
-
-  function deletePost(createdAt) {
-    console.log("hello");
-    console.log(createdAt);
-    // gun
-    // .get("users")
-    // .get(currUser)
-    // .get("posts_timeline")
-    // .get(`${currUser}_${createdAt}`)
-    // .put(null);
   }
 
   return (
@@ -176,6 +230,7 @@ const Home = () => {
         <Box className="logo">
           <img src={logo} width={"40px"} height={"40px"}></img>
         </Box>
+        <Typography variant="h5">{currUser}</Typography>
         <Box className="logout-btn">
           <Button variant="contained">Logout</Button>
         </Box>
@@ -218,46 +273,30 @@ const Home = () => {
             </Button>
           </Box>
         </Box>
+        {follows.map((follow) => (
+          <p>{follow}</p>
+        ))}
         <Box className="posts-wrapper">
-          {getAllPosts().map((post) => (
-            <Box key={post.createdAt} className="single_post-wrapper">
-              <Box className="post_container">
-                <InputAdornment>
-                  <AccountCircle sx={{ height: "100px", width: "100px" }} />
-                </InputAdornment>
-                <Box className="post-content">
-                  <Box className="post-content-title">
-                    <Typography>{post.from}</Typography>
-                    <Typography>{formatDate(post.createdAt)}</Typography>
-                  </Box>
-
-                  <Typography>{post.content}</Typography>
+          {getAllPosts().map((post, idx) => (
+            <Box key={idx} className="post_container">
+              <InputAdornment>
+                <AccountCircle sx={{ height: "100px", width: "100px" }} />
+              </InputAdornment>
+              <Box className="post-content">
+                <Box className="post-content-title">
+                  <Typography>{post.from}</Typography>
+                  <Typography>{formatDate(post.createdAt)}</Typography>
+                  {post.from === currUser && (
+                    <Button
+                      onClick={() => handleDeletePost(post)}
+                      variant="contained"
+                    >
+                      Delete
+                    </Button>
+                  )}
                 </Box>
-              </Box>
 
-              <Box className="post-action-btns-wrapper">
-                {post.from === currUser ? (
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => {
-                      gun
-                        .get("users")
-                        .get(currUser)
-                        .get("posts_timeline")
-                        .get(`${currUser}_${post.createdAt}`)
-                        .put(null);
-                    }}
-                  >
-                    <DeleteIcon />
-                    Delete
-                  </Button>
-                ) : (
-                  <Button variant="contained">
-                    <PersonRemoveIcon />
-                    Unfollow
-                  </Button>
-                )}
+                <Typography>{post.content}</Typography>
               </Box>
             </Box>
           ))}
@@ -279,17 +318,33 @@ const Home = () => {
               </Box>
             </Box>
           </Box>
-          <Box className="follows-wrapper">
-            <Box className="follows-user_profile">
-              <InputAdornment>
-                <AccountCircle sx={{ height: "60px", width: "60px" }} />
-              </InputAdornment>
-              <Box className="follows-user_profile_content">
-                <Typography>Donald Trump</Typography>
-                <Button variant="contained">Follow</Button>
+          {allUsers.map((user, idx) => (
+            <Box className="follows-wrapper">
+              <Box className="follows-user_profile">
+                <InputAdornment>
+                  <AccountCircle sx={{ height: "60px", width: "60px" }} />
+                </InputAdornment>
+                <Box className="follows-user_profile_content">
+                  <Typography>{user}</Typography>
+                  {follows.includes(user) ? (
+                    <Button
+                      onClick={() => handleRemoveFollow(user)}
+                      variant="contained"
+                    >
+                      unflollow
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => handleAddFollow(user)}
+                      variant="contained"
+                    >
+                      Follow
+                    </Button>
+                  )}
+                </Box>
               </Box>
             </Box>
-          </Box>
+          ))}
         </Box>
       </Box>
     </Box>
