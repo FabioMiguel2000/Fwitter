@@ -9,7 +9,7 @@ import "gun/sea";
 function App() {
   const gun = Gun({
     file: "db/data.json",
-    peers: [`http://localhost:8765/gun`],
+    peers: [`http://localhost:8765/gun`]
   });
   // const gun = Gun();
   const user = gun.user().recall({ sessionStorage: true });
