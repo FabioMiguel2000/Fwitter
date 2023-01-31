@@ -1,6 +1,8 @@
 # SDLE Second Assignment
 
-SDLE Second Assignment of group T01G14.
+An Online Social Media and Social Networking Service using Decentralised Timeline (Fake Twitter) developed in the course of Large Scale Distributed Systems by group T01G14.
+
+[Video Demo](https://www.youtube.com/watch?v=vnDk2BjTk3Y&ab_channel=FabHuang)
 
 Group members:
 
